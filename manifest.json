@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Enhancer for X (formerly known as Twitter)",
+  "version": "1.0",
+  "description": "Customize which menu items appear in the x.com sidebar",
+  "permissions": ["storage"],
+  "host_permissions": ["*://*.twitter.com/*", "*://*.x.com/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.twitter.com/*", "*://*.x.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        :root {
+            --primary-color: #1DA1F2;
+            --border-color: #2f3336;
+            --text-color: #e7e9ea;
+            --text-secondary: #71767b;
+            --bg-hover: rgba(239, 243, 244, 0.1);
+            --bg-item: #16181c;
+            --bg-main: #000000;
+        }
+
+        body {
+            width: 300px;
+            padding: 16px;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-color);
+        }
+
+        h3 {
+            font-size: 20px;
+            margin: 0 0 16px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .menu-section-wrapper {
+            margin-bottom: 24px;
+            background: var(--bg-item);
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .menu-section-wrapper h4 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .menu-section-wrapper h5 {
+            margin: 12px 0 8px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-section {
+            margin-bottom: 12px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            margin: 4px 0;
+            padding: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .menu-item.dragging {
+            opacity: 0.7;
+            background: var(--bg-hover);
+            border: 1px dashed var(--border-color);
+        }
+
+        .menu-item label {
+            margin-left: 8px;
+            cursor: pointer;
+            flex-grow: 1;
+            font-size: 14px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-secondary);
+            fill: none;
+            opacity: 1;
+        }
+
+        /* Custom checkbox styling */
+        .menu-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .menu-item input[type="checkbox"]:checked::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            width: 8px;
+            height: 4px;
+            border: 2px solid white;
+            border-top: 0;
+            border-right: 0;
+            margin-top: -1px;
+        }
+
+        .drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            margin-left: auto;
+            padding: 4px;
+            cursor: move;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .drag-handle::before {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%2371767b' class='size-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .menu-item:hover .drag-handle {
+            opacity: 1;
+        }
+
+        .external-icon {
+            display: none;
+        }
+
+        .menu-section[data-section*="-disabled"] .menu-item {
+            opacity: 0.7;
+        }
+
+        .menu-section[data-section*="-disabled"] .menu-item:hover {
+            opacity: 1;
+        }
+
+        /* Smooth transitions */
+        .menu-item {
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Remove the SVG sprite since we're not using it */
+        svg[style="display: none;"] {
+            display: none !important;
+        }
+
+        /* Add hover effect for the icon */
+        .menu-item:hover .menu-icon svg {
+            stroke: var(--text-color);
+            opacity: 1;
+        }
+
+        /* Make icons in disabled section even lighter */
+        .menu-section[data-section*="-disabled"] .menu-icon svg {
+            opacity: 0.7;
+        }
+
+        /* Add these styles */
+        a[data-added-by-extension="true"]:hover {
+            background-color: rgba(231, 233, 234, 0.1);
+            transition: background-color 0.2s;
+        }
+
+        a[data-added-by-extension="true"]:hover .r-m6rgpd {
+            color: rgb(231, 233, 234);
+        }
+
+        /* Active state - when the current URL matches the link */
+        a[data-added-by-extension="true"].active {
+            font-weight: 700;
+        }
+
+        a[data-added-by-extension="true"].active svg {
+            color: rgb(231, 233, 234) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <svg style="display: none;">
+        <symbol id="check-icon" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </symbol>
+        <symbol id="drag-icon" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+        </symbol>
+    </svg>
+    <h3>Enhancer for X</h3>
+    <div id="toggles"></div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
