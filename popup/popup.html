@@ -1,95 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Editor</title>
     <style>
         body {
-            width: 200px;
-            padding: 10px;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: Arial, sans-serif;
+            width: 280px;
+            margin: 0;
+            padding: 16px;
+            background-color: #f9f9f9;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 16px;
         }
 
         .toggle-container {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
 
-        #editMode {
-            margin: 10px 0;
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        .button-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
         }
 
-        #resetButton,
-        #addItemButton {
-            flex: 1;
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #1d9bf0;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .editing-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .reset-button {
+            width: 100%;
             padding: 8px;
+            font-size: 14px;
+            color: white;
+            background-color: #e0245e;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        #resetButton {
-            background-color: #e0245e;
-            color: white;
-        }
-
-        #addItemButton {
-            background-color: #1d9bf0;
-            color: white;
-        }
-
-        #resetButton:hover {
+        .reset-button:hover {
             background-color: #c01e4e;
-        }
-
-        #addItemButton:hover {
-            background-color: #1a8cd8;
-        }
-
-        .add-item-form {
-            display: none;
-            margin-top: 10px;
-        }
-
-        .add-item-form.visible {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 10px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 6px;
-            margin-top: 4px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
         }
 
         #status {
             margin-top: 10px;
             text-align: center;
+            font-size: 12px;
+            color: #28a745;
         }
     </style>
 </head>
 
 <body>
-    <div class="toggle-container">
-        <label for="editMode">Edit Menu Items:</label>
-        <input type="checkbox" id="editMode">
+    <div class="card">
+        <div class="toggle-container">
+            <span class="toggle-label">Edit Menu Items</span>
+            <label class="toggle">
+                <input type="checkbox" id="editMode">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <p id="editingInfo" class="editing-info">
+            Edit mode is active. Drag items to reorder or click to hide/show them.
+        </p>
+        <button id="resetButton" class="reset-button">Reset Items</button>
+        <div id="status"></div>
     </div>
-    <div class="button-container">
-        <button id="resetButton">Reset Items</button>
-    </div>
-    <div id="status"></div>
     <script src="../content/menu-items.js"></script>
     <script src="index.js"></script>
 </body>
