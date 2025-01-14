@@ -98,27 +98,18 @@ export function setupPopupHandlers() {
 
     // Handle reset button click
     resetButton.addEventListener('click', function () {
-        // Clear all storage except customItems
-        chrome.storage.local.get(['customItems'], function (result) {
-            const customItems = result.customItems || [];
-            chrome.storage.local.clear(function () {
-                // Restore customItems if there were any
-                if (customItems.length > 0) {
-                    chrome.storage.local.set({ customItems });
-                }
+        // Clear all storage completely
+        chrome.storage.local.clear(function () {
+            // Send reset message to content script
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'resetMenuItems'
+                }, function () {
+                    // Reload the current tab after clearing storage
+                    chrome.tabs.reload(tabs[0].id);
 
-                // Send reset message to content script
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, {
-                        action: 'resetMenuItems'
-                    });
-
-                    // Show success message
-                    statusDiv.textContent = 'Menu items restored!';
-                    statusDiv.style.color = '#28a745';
-                    setTimeout(() => {
-                        statusDiv.textContent = '';
-                    }, 2000);
+                    // Close the popup
+                    window.close();
                 });
             });
         });

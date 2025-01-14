@@ -26,7 +26,7 @@ function initializeMenu() {
     defaultVisibleItems = detectDefaultItems();
 
     chrome.storage.local.get(['hiddenItems', 'editMode', 'customItems', 'menuOrder'], function (result) {
-        setEditMode(result.editMode || false);
+        editMode = result.editMode || false;
         const customItems = result.customItems || [];
         console.log('Restoring custom items:', customItems); // Debug log
 
@@ -50,11 +50,16 @@ function initializeMenu() {
             if (moreButton) {
                 nav.appendChild(moreButton); // Move More to the end
 
+                // First, collect all menu items in a Map for quick lookup
+                const menuItems = new Map();
+                [...nav.querySelectorAll('a[role="link"]')].forEach(item => {
+                    const name = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
+                    if (name) menuItems.set(name, item);
+                });
+
+                // Then reorder according to menuOrder
                 menuOrder.forEach(itemName => {
-                    if (itemName === 'More') return;
-                    const item = [...nav.querySelectorAll('a[role="link"]')].find(
-                        el => el.querySelector('[dir="ltr"] span')?.textContent?.trim() === itemName
-                    );
+                    const item = menuItems.get(itemName);
                     if (item) {
                         nav.insertBefore(item, moreButton);
                     }
@@ -62,7 +67,7 @@ function initializeMenu() {
             }
         }
 
-        // Add the following code to apply hiddenItems
+        // Apply hidden items
         const hiddenItems = result.hiddenItems || [];
         hiddenItems.forEach(hiddenItemName => {
             const item = [...nav.querySelectorAll('a[role="link"]')].find(
@@ -162,5 +167,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
     }
 });
+
+function saveMenuOrder() {
+    const nav = document.querySelector('nav[role="navigation"]');
+    if (!nav) return;
+
+    // Get all menu items except the More button
+    const menuOrder = [...nav.querySelectorAll('a[role="link"]')]
+        .map(item => item.querySelector('[dir="ltr"] span')?.textContent?.trim())
+        .filter(name => name && name !== 'More');
+
+    // Save to storage
+    chrome.storage.local.set({ menuOrder }, () => {
+        console.log('Menu order saved:', menuOrder);
+    });
+}
 
 window.startObserver = startObserver; 
