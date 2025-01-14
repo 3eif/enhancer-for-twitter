@@ -22,54 +22,40 @@ const ALL_MENU_ITEMS = [
 // Helper function to create menu items
 function createMenuItem(name, url, icon) {
     const nav = document.querySelector('nav[role="navigation"]');
-    if (!nav) return null;
+    if (!nav) return;
 
+    // Find the More button to copy its classes and structure
+    const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
+    if (!moreButton) return;
+
+    // Get the SVG element and its class names directly
+    const svgClasses = moreButton.querySelector('svg').getAttribute('class');
+
+    // Create menu item
     const menuItem = document.createElement('a');
     menuItem.setAttribute('role', 'link');
     menuItem.setAttribute('href', url);
     menuItem.setAttribute('data-testid', `AppTabBar_${name}_Link`);
-    menuItem.className = 'css-175oi2r r-6koalj r-eqz5dr r-16y2uox r-1habvwh r-cnw61z r-13qz1uu r-1ny4l3l r-1loqt21';
-    menuItem.style.position = 'relative';
+    menuItem.setAttribute('aria-label', name);
 
+    // Copy classes from More button
+    menuItem.className = moreButton.className;
+
+    // Copy exact inner structure from More button with the correct SVG classes
     menuItem.innerHTML = `
-        <div class="css-175oi2r r-sdzlij r-dnmrzs r-1awozwy r-18u37iz r-1777fci r-xyw6el r-o7ynqc r-6416eg">
-            <div class="css-175oi2r">
-                <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-lwhw9o r-cnnz9e">
-                    <path d="${icon}"></path>
+        <div class="${moreButton.firstElementChild.className}">
+            <div class="${moreButton.querySelector('div > div').className}">
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="${svgClasses}">
+                    <g><path d="${icon}"></path></g>
                 </svg>
             </div>
-            <div dir="ltr" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-adyw6z r-135wba7 r-16dba41 r-dlybji r-nazi8o" style="color: rgb(231, 233, 234);">
-                <span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">${name}</span>
+            <div dir="ltr" class="${moreButton.querySelector('div[dir="ltr"]').className}" style="${moreButton.querySelector('div[dir="ltr"]').getAttribute('style')}">
+                <span class="${moreButton.querySelector('span').className}">${name}</span>
             </div>
         </div>
     `;
 
-    // Add hover styles
-    const style = document.createElement('style');
-    style.textContent = `
-        [data-testid="AppTabBar_${name}_Link"]:hover {
-            background-color: rgba(231, 233, 234, 0.1) !important;
-            cursor: pointer;
-        }
-        [data-testid="AppTabBar_${name}_Link"]:hover svg {
-            color: rgb(231, 233, 234) !important;
-        }
-        [data-testid="AppTabBar_${name}_Link"] svg {
-            color: rgb(231, 233, 234);
-        }
-        [data-testid="AppTabBar_${name}_Link"].hidden-item {
-            text-decoration: line-through;
-            opacity: 0.5;
-        }
-        [data-testid="AppTabBar_${name}_Link"].hidden-item:hover {
-            background-color: rgba(231, 233, 234, 0.1) !important;
-            cursor: pointer;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Find the "More" button to insert before it
-    const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
+    // Insert before More button
     if (moreButton) {
         nav.insertBefore(menuItem, moreButton);
     } else {
