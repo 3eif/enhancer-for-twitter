@@ -24,11 +24,13 @@ function initializeMenu() {
 
     // Detect default items first
     defaultVisibleItems = detectDefaultItems();
+    console.log('Default visible items:', defaultVisibleItems);
 
     chrome.storage.local.get(['hiddenItems', 'editMode', 'customItems', 'menuOrder'], function (result) {
         editMode = result.editMode || false;
         const customItems = result.customItems || [];
-        console.log('Restoring custom items:', customItems); // Debug log
+        const menuOrder = result.menuOrder || [];
+        console.log('Initializing menu with:', { customItems, menuOrder });
 
         // First restore custom items
         customItems.forEach(item => {
@@ -44,8 +46,8 @@ function initializeMenu() {
         });
 
         // Then restore menu order
-        const menuOrder = result.menuOrder || [];
         if (menuOrder.length > 0) {
+            console.log('Restoring menu order:', menuOrder);
             const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
             if (moreButton) {
                 nav.appendChild(moreButton); // Move More to the end
@@ -61,6 +63,7 @@ function initializeMenu() {
                 menuOrder.forEach(itemName => {
                     const item = menuItems.get(itemName);
                     if (item) {
+                        console.log('Reordering item:', itemName);
                         nav.insertBefore(item, moreButton);
                     }
                 });
@@ -69,9 +72,10 @@ function initializeMenu() {
 
         // Apply hidden items
         const hiddenItems = result.hiddenItems || [];
+        console.log('Applying hidden items:', hiddenItems);
         hiddenItems.forEach(hiddenItemName => {
             const item = [...nav.querySelectorAll('a[role="link"]')].find(
-                el => el.querySelector('[dir="ltr"] span')?.textContent?.trim().toLowerCase() === hiddenItemName
+                el => el.querySelector('[dir="ltr"] span')?.textContent?.trim().toLowerCase() === hiddenItemName.toLowerCase()
             );
             if (item) {
                 item.style.display = 'none';
@@ -79,6 +83,7 @@ function initializeMenu() {
         });
 
         isInitialized = true;
+        console.log('Menu initialization complete');
     });
 }
 

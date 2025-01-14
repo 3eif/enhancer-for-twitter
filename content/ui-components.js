@@ -161,29 +161,27 @@ function addDoneButton(editMode, postButton) {
 
         // Get all menu items
         const menuItems = [...nav.querySelectorAll('a[role="link"]')];
+        console.log('All menu items:', menuItems);
 
-        // Define items that should maintain their original position
-        const fixedPositionItems = ['Home', 'Explore', 'Notifications', 'Messages'];
-
-        // Filter out fixed position items from the menu order
+        // Get the complete menu order including fixed position items
         const menuOrder = menuItems
-            .filter(item => {
-                const itemName = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
-                return itemName && !fixedPositionItems.includes(itemName);
-            })
             .map(item => item.querySelector('[dir="ltr"] span')?.textContent?.trim())
-            .filter(Boolean);
+            .filter(Boolean)
+            .filter(name => name.toLowerCase() !== 'more');
+
+        console.log('Saving menu order on Done:', menuOrder);
 
         // Get hidden items
         const hiddenItems = [...document.querySelectorAll('.hidden-item')]
             .map(item => item.dataset.itemName)
             .filter(Boolean);
 
-        // Get custom items (excluding fixed position items)
+        // Get custom items (excluding default items)
+        const defaultItems = ['Home', 'Explore', 'Notifications', 'Messages'];
         const customItems = menuItems
             .filter(item => {
                 const itemName = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
-                return itemName && !fixedPositionItems.includes(itemName);
+                return itemName && !defaultItems.includes(itemName);
             })
             .map(item => ({
                 name: item.querySelector('[dir="ltr"] span')?.textContent?.trim(),
@@ -192,6 +190,8 @@ function addDoneButton(editMode, postButton) {
             }))
             .filter(item => item.name && item.url && item.icon);
 
+        console.log('Saving state:', { menuOrder, hiddenItems, customItems });
+
         // Save everything to storage
         chrome.storage.local.set({
             menuOrder,
@@ -199,6 +199,8 @@ function addDoneButton(editMode, postButton) {
             customItems,
             editMode: false
         }, function () {
+            console.log('Settings saved successfully');
+
             // Show the Post button again before removing Done button
             postButton.style.display = '';
 
