@@ -98,17 +98,29 @@ function enableEditMode() {
     // Add the "Add Items" button at the top of the menu if it doesn't exist
     if (!document.querySelector('#addMenuItemsButton')) {
         const nav = document.querySelector('nav[role="navigation"]');
-        const addButton = document.createElement('div');
+        const addButton = document.createElement('a');
         addButton.id = 'addMenuItemsButton';
-        addButton.className = 'css-175oi2r r-6koalj r-eqz5dr r-16y2uox r-1habvwh r-cnw61z r-13qz1uu r-1ny4l3l r-1loqt21';
-        addButton.style.cursor = 'pointer';
-        addButton.style.padding = '12px';
-        addButton.style.backgroundColor = '#1d9bf0';
-        addButton.style.borderRadius = '4px';
+        addButton.role = 'link';
+        addButton.className = 'css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-2yi16 r-1qi8awa r-3pj75a r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21';
+        addButton.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+        addButton.style.borderColor = 'rgb(83, 100, 113)';
         addButton.style.margin = '8px';
-        addButton.style.textAlign = 'center';
-        addButton.style.color = 'white';
-        addButton.innerHTML = 'Add Menu Items';
+
+        const innerDiv = document.createElement('div');
+        innerDiv.dir = 'ltr';
+        innerDiv.className = 'css-146c3p1 r-bcqeeo r-qvutc0 r-37j5jr r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci';
+        innerDiv.style.color = 'rgb(239, 243, 244)';
+
+        const span = document.createElement('span');
+        span.className = 'css-1jxf684 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-a023e6 r-rjixqe';
+
+        const innerSpan = document.createElement('span');
+        innerSpan.className = 'css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3';
+        innerSpan.textContent = 'Add Menu Items';
+
+        span.appendChild(innerSpan);
+        innerDiv.appendChild(span);
+        addButton.appendChild(innerDiv);
 
         addButton.addEventListener('click', showAddItemsDialog);
         nav.insertBefore(addButton, nav.firstChild);
@@ -347,24 +359,25 @@ async function showAddItemsDialog() {
         left: 50%;
         transform: translate(-50%, -50%);
         background: #000000;
-        border: 1px solid #333;
-        border-radius: 16px;
         padding: 20px;
+        border-radius: 16px;
         z-index: 10000;
         min-width: 300px;
-        max-height: 80vh;
+        max-width: 90vw;
+        max-height: 90vh;
         overflow-y: auto;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        font-family: "TwitterChirp", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     `;
 
     // Add title
-    const title = document.createElement('h3');
+    const title = document.createElement('div');
     title.textContent = 'Add Menu Items';
     title.style.cssText = `
         color: white;
         margin: 0 0 16px 0;
         font-size: 20px;
         font-weight: bold;
+        font-family: "TwitterChirp", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     `;
     dialog.appendChild(title);
 
