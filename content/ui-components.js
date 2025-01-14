@@ -159,29 +159,34 @@ function addDoneButton(editMode, postButton) {
         const nav = document.querySelector('nav[role="navigation"]');
         if (!nav) return;
 
+        console.log('Done button clicked - saving menu state and disabling edit mode');
+
         // Get all menu items
         const menuItems = [...nav.querySelectorAll('a[role="link"]')];
-        console.log('All menu items:', menuItems);
 
-        // Get the complete menu order including fixed position items
-        const menuOrder = menuItems
+        // Save menu state first
+        const visibleItems = menuItems.filter(item => {
+            const name = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
+            const isVisible = window.getComputedStyle(item).display !== 'none';
+            const isMoreButton = name === 'More';
+            return name && isVisible && !isMoreButton;
+        });
+
+        const menuOrder = visibleItems
             .map(item => item.querySelector('[dir="ltr"] span')?.textContent?.trim())
-            .filter(Boolean)
-            .filter(name => name.toLowerCase() !== 'more');
-
-        console.log('Saving menu order on Done:', menuOrder);
-
-        // Get hidden items
-        const hiddenItems = [...document.querySelectorAll('.hidden-item')]
-            .map(item => item.dataset.itemName)
             .filter(Boolean);
 
-        // Get custom items (excluding default items)
+        const hiddenItems = menuItems
+            .filter(item => window.getComputedStyle(item).display === 'none')
+            .map(item => item.querySelector('[dir="ltr"] span')?.textContent?.trim())
+            .filter(Boolean);
+
+        // Get custom items
         const defaultItems = ['Home', 'Explore', 'Notifications', 'Messages'];
-        const customItems = menuItems
+        const customItems = visibleItems
             .filter(item => {
-                const itemName = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
-                return itemName && !defaultItems.includes(itemName);
+                const name = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
+                return name && !defaultItems.includes(name);
             })
             .map(item => ({
                 name: item.querySelector('[dir="ltr"] span')?.textContent?.trim(),
@@ -190,25 +195,65 @@ function addDoneButton(editMode, postButton) {
             }))
             .filter(item => item.name && item.url && item.icon);
 
-        console.log('Saving state:', { menuOrder, hiddenItems, customItems });
-
-        // Save everything to storage
+        // Save to storage
         chrome.storage.local.set({
             menuOrder,
             hiddenItems,
             customItems,
             editMode: false
         }, function () {
-            console.log('Settings saved successfully');
+            // Disable all menu item interactions
+            menuItems.forEach(item => {
+                // Remove draggable attribute and event listeners
+                item.removeAttribute('draggable');
+                item.style.cursor = 'pointer';
 
-            // Show the Post button again before removing Done button
+                // Remove all event listeners by cloning and replacing
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+
+                // Remove any strike-through elements
+                const strikeContainer = newItem.querySelector('.strike-container');
+                if (strikeContainer) {
+                    strikeContainer.remove();
+                }
+            });
+
+            // Remove edit mode UI
+            document.querySelectorAll('.strike-container').forEach(el => el.remove());
+            document.querySelector('#addMenuItemsButton')?.remove();
+
+            // Show the Post button and remove Done button
             postButton.style.display = '';
-
-            // Remove the Done button
             doneButton.remove();
 
-            // Reload the page to apply changes
-            window.location.reload();
+            // Add CSS to prevent jiggling
+            const styleId = 'menu-stabilizer';
+            let styleEl = document.getElementById(styleId);
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = styleId;
+                document.head.appendChild(styleEl);
+            }
+
+            styleEl.textContent = `
+                nav[role="navigation"] a[role="link"] {
+                    transform: none !important;
+                    transition: none !important;
+                }
+                nav[role="navigation"] a[role="link"]:hover {
+                    transform: none !important;
+                    background-color: transparent !important;
+                }
+                nav[role="navigation"] a[role="link"] > div {
+                    transform: none !important;
+                    transition: none !important;
+                }
+            `;
+
+            // Remove edit mode class and update popup
+            document.body.classList.remove('edit-mode');
+            chrome.runtime.sendMessage({ action: 'updateEditMode', value: false });
         });
     });
 

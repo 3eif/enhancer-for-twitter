@@ -22,6 +22,8 @@ function initializeMenu() {
     const nav = document.querySelector('nav[role="navigation"]');
     if (!nav) return;
 
+    console.log('Initializing menu');
+
     // Detect default items first
     defaultVisibleItems = detectDefaultItems();
     console.log('Default visible items:', defaultVisibleItems);
@@ -30,36 +32,53 @@ function initializeMenu() {
         editMode = result.editMode || false;
         const customItems = result.customItems || [];
         const menuOrder = result.menuOrder || [];
-        console.log('Initializing menu with:', { customItems, menuOrder });
+        const hiddenItems = result.hiddenItems || [];
+
+        console.log('Retrieved from storage:', { customItems, menuOrder, hiddenItems });
 
         // First restore custom items
         customItems.forEach(item => {
             const exists = [...nav.querySelectorAll('a[role="link"]')].some(
-                existing =>
-                    existing.getAttribute('href') === item.url ||
-                    existing.querySelector('[dir="ltr"] span')?.textContent?.trim() === item.name
+                existing => {
+                    const existingName = existing.querySelector('[dir="ltr"] span')?.textContent?.trim();
+                    return existing.getAttribute('href') === item.url || existingName === item.name;
+                }
             );
 
             if (!exists) {
+                console.log('Creating custom menu item:', item.name);
                 createMenuItem(item.name, item.url, item.icon);
             }
         });
 
-        // Then restore menu order
+        // Hide items that should be hidden
+        hiddenItems.forEach(itemName => {
+            const item = [...nav.querySelectorAll('a[role="link"]')]
+                .find(el => el.querySelector('[dir="ltr"] span')?.textContent?.trim() === itemName);
+
+            if (item) {
+                console.log('Hiding menu item:', itemName);
+                item.style.display = 'none';
+            }
+        });
+
+        // Then restore menu order for visible items
         if (menuOrder.length > 0) {
             console.log('Restoring menu order:', menuOrder);
             const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
             if (moreButton) {
                 nav.appendChild(moreButton); // Move More to the end
 
-                // First, collect all menu items in a Map for quick lookup
+                // Create a map of all menu items
                 const menuItems = new Map();
-                [...nav.querySelectorAll('a[role="link"]')].forEach(item => {
-                    const name = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
-                    if (name) menuItems.set(name, item);
-                });
+                [...nav.querySelectorAll('a[role="link"]')]
+                    .filter(item => window.getComputedStyle(item).display !== 'none')
+                    .forEach(item => {
+                        const name = item.querySelector('[dir="ltr"] span')?.textContent?.trim();
+                        if (name) menuItems.set(name, item);
+                    });
 
-                // Then reorder according to menuOrder
+                // Reorder according to menuOrder
                 menuOrder.forEach(itemName => {
                     const item = menuItems.get(itemName);
                     if (item) {
@@ -69,18 +88,6 @@ function initializeMenu() {
                 });
             }
         }
-
-        // Apply hidden items
-        const hiddenItems = result.hiddenItems || [];
-        console.log('Applying hidden items:', hiddenItems);
-        hiddenItems.forEach(hiddenItemName => {
-            const item = [...nav.querySelectorAll('a[role="link"]')].find(
-                el => el.querySelector('[dir="ltr"] span')?.textContent?.trim().toLowerCase() === hiddenItemName.toLowerCase()
-            );
-            if (item) {
-                item.style.display = 'none';
-            }
-        });
 
         isInitialized = true;
         console.log('Menu initialization complete');
