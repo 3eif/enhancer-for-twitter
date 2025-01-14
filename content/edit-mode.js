@@ -116,15 +116,18 @@ function enableEditMode() {
         const addButton = document.createElement('a');
         addButton.id = 'addMenuItemsButton';
         addButton.role = 'link';
-        addButton.className = 'css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-2yi16 r-1qi8awa r-3pj75a r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21';
-        addButton.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-        addButton.style.borderColor = 'rgb(83, 100, 113)';
-        addButton.style.margin = '8px';
+        addButton.className = 'css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-19yznuf r-64el8z r-1fkl15p r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21';
+        addButton.style.cssText = `
+            background-color: rgb(29, 155, 240);
+            border-color: rgba(0, 0, 0, 0);
+            margin: 8px;
+            cursor: pointer;
+        `;
 
         const innerDiv = document.createElement('div');
         innerDiv.dir = 'ltr';
         innerDiv.className = 'css-146c3p1 r-bcqeeo r-qvutc0 r-37j5jr r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci';
-        innerDiv.style.color = 'rgb(239, 243, 244)';
+        innerDiv.style.color = 'rgb(255, 255, 255)';
 
         const span = document.createElement('span');
         span.className = 'css-1jxf684 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-a023e6 r-rjixqe';

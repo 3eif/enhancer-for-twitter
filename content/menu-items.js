@@ -24,36 +24,58 @@ function createMenuItem(name, url, icon) {
     const nav = document.querySelector('nav[role="navigation"]');
     if (!nav) return;
 
-    // Find the More button to copy its classes and structure
     const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
     if (!moreButton) return;
 
-    // Get the SVG element and its class names directly
     const svgClasses = moreButton.querySelector('svg').getAttribute('class');
-
-    // Create menu item
     const menuItem = document.createElement('a');
+    menuItem.href = url;
     menuItem.setAttribute('role', 'link');
-    menuItem.setAttribute('href', url);
     menuItem.setAttribute('data-testid', `AppTabBar_${name}_Link`);
     menuItem.setAttribute('aria-label', name);
-
-    // Copy classes from More button
     menuItem.className = moreButton.className;
 
-    // Copy exact inner structure from More button with the correct SVG classes
+    // Create the menu item with the same structure but without hover classes initially
     menuItem.innerHTML = `
-        <div class="${moreButton.firstElementChild.className}">
-            <div class="${moreButton.querySelector('div > div').className}">
+        <div class="css-175oi2r r-sdzlij r-dnmrzs r-1awozwy r-18u37iz r-1777fci r-xyw6el r-o7ynqc r-6416eg">
+            <div class="css-175oi2r">
                 <svg viewBox="0 0 24 24" aria-hidden="true" class="${svgClasses}">
                     <g><path d="${icon}"></path></g>
                 </svg>
             </div>
-            <div dir="ltr" class="${moreButton.querySelector('div[dir="ltr"]').className}" style="${moreButton.querySelector('div[dir="ltr"]').getAttribute('style')}">
-                <span class="${moreButton.querySelector('span').className}">${name}</span>
+            <div dir="ltr" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-adyw6z r-135wba7 r-16dba41 r-dlybji r-nazi8o" style="color: rgb(15, 20, 25);">
+                <span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">${name}</span>
             </div>
         </div>
     `;
+
+    // Add hover event listeners to apply/remove the hover classes
+    menuItem.addEventListener('mouseenter', () => {
+        const mainDiv = menuItem.querySelector('.css-175oi2r.r-sdzlij');
+        const textDiv = menuItem.querySelector('div[dir="ltr"]');
+        if (mainDiv) mainDiv.classList.add('r-1ydqjzz');
+        if (textDiv) textDiv.classList.add('r-18jsvk2');
+    });
+
+    menuItem.addEventListener('mouseleave', () => {
+        const mainDiv = menuItem.querySelector('.css-175oi2r.r-sdzlij');
+        const textDiv = menuItem.querySelector('div[dir="ltr"]');
+        if (mainDiv) mainDiv.classList.remove('r-1ydqjzz');
+        if (textDiv) textDiv.classList.remove('r-18jsvk2');
+    });
+
+    // Prevent default navigation and use Twitter's client-side routing
+    menuItem.addEventListener('click', (e) => {
+        if (!getEditMode()) {  // Only handle navigation when not in edit mode
+            e.preventDefault();
+            // Use Twitter's history API to navigate
+            if (window.history && typeof window.history.pushState === 'function') {
+                window.history.pushState({}, '', url);
+                // Dispatch a popstate event to trigger Twitter's router
+                window.dispatchEvent(new PopStateEvent('popstate'));
+            }
+        }
+    });
 
     // Insert before More button
     if (moreButton) {

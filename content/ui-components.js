@@ -78,7 +78,96 @@ function showAddItemsDialog() {
         itemButton.addEventListener('click', () => {
             const menuItem = createMenuItem(item.name, item.url, item.icon);
             if (getEditMode()) {
-                enableEditModeForItem(menuItem);
+                menuItem.setAttribute('draggable', 'true');
+                setupDragAndDrop(menuItem);
+
+                // Add a container for the strikethrough effect with exact same styling
+                const contentContainer = menuItem.querySelector('div[dir="ltr"]') || menuItem;
+
+                const container = document.createElement('div');
+                container.className = 'strike-container';
+                container.style.cssText = `
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    pointer-events: none;
+                    display: none;
+                `;
+
+                const strike = document.createElement('div');
+                strike.className = 'strike-line';
+                strike.style.cssText = `
+                    position: absolute;
+                    width: ${contentContainer.offsetWidth}px;
+                    height: 3px;
+                    background-color: white;
+                    top: 50%;
+                    left: ${contentContainer.offsetLeft}px;
+                    transform: translateY(-50%);
+                `;
+
+                container.appendChild(strike);
+                menuItem.style.position = 'relative';
+                menuItem.appendChild(container);
+
+                // Add drag handle
+                const dragHandle = document.createElement('div');
+                dragHandle.className = 'drag-handle';
+                dragHandle.style.cssText = `
+                    display: none;
+                    position: absolute;
+                    right: 8px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 16px;
+                    height: 16px;
+                    opacity: 0.5;
+                    cursor: grab;
+                `;
+                dragHandle.innerHTML = `
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M8 4a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm8 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM8 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm8 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM8 23a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm8 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                    </svg>
+                `;
+                menuItem.appendChild(dragHandle);
+
+                // Add hover handlers
+                menuItem.addEventListener('mouseenter', () => {
+                    if (getEditMode()) {
+                        dragHandle.style.display = 'block';
+                        const container = menuItem.querySelector('.strike-container');
+                        if (container) {
+                            container.style.display = 'block';
+                        }
+                    }
+                });
+                menuItem.addEventListener('mouseleave', () => {
+                    dragHandle.style.display = 'none';
+                    const container = menuItem.querySelector('.strike-container');
+                    if (container) {
+                        container.style.display = 'none';
+                    }
+                });
+
+                // Add click handler for hiding
+                menuItem.addEventListener('click', (e) => {
+                    if (getEditMode()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        menuItem.style.display = 'none';
+
+                        const itemText = menuItem.querySelector('[dir="ltr"] span')?.textContent?.trim().toLowerCase();
+                        if (itemText) {
+                            chrome.storage.local.get(['hiddenItems'], function (result) {
+                                let hiddenItems = result.hiddenItems || [];
+                                hiddenItems = [...new Set([...hiddenItems, itemText])];
+                                chrome.storage.local.set({ hiddenItems });
+                            });
+                        }
+                    }
+                });
             }
             dialog.remove();
             backdrop.remove();
