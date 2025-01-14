@@ -1,3 +1,4 @@
+// Menu items data shared between content and popup scripts
 const ALL_MENU_ITEMS = [
     { name: 'Home', url: '/home', icon: 'M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913H9.14c.51 0 .929-.41.929-.913v-7.075h3.909v7.075c0 .502.417.913.928.913h6.165c.511 0 .929-.41.929-.913V7.904c0-.301-.158-.584-.408-.758z' },
     { name: 'Explore', url: '/explore', icon: 'M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z' },
@@ -18,127 +19,65 @@ const ALL_MENU_ITEMS = [
     { name: 'Create your Space', url: '/i/spaces/start', icon: 'M12 22.25c-4.99 0-9.18-3.393-10.39-7.994l1.93-.512c.99 3.746 4.4 6.506 8.46 6.506s7.47-2.76 8.46-6.506l1.93.512c-1.21 4.601-5.4 7.994-10.39 7.994zM5 11.5c0 3.866 3.13 7 7 7s7-3.134 7-7V8.75c0-3.866-3.13-7-7-7s-7 3.134-7 7v2.75zm12-2.75v2.75c0 2.761-2.24 5-5 5s-5-2.239-5-5V8.75c0-2.761 2.24-5 5-5s5 2.239 5 5zM11.25 8v4.25c0 .414.34.75.75.75s.75-.336.75-.75V8c0-.414-.34-.75-.75-.75s-.75.336-.75.75zm-3 1v2.25c0 .414.34.75.75.75s.75-.336.75-.75V9c0-.414-.34-.75-.75-.75s-.75.336-.75.75zm7.5 0c0-.414-.34-.75-.75-.75s-.75.336-.75.75v2.25c0 .414.34.75.75.75s.75-.336.75-.75V9z' }
 ];
 
-document.addEventListener('DOMContentLoaded', function () {
-    const editModeCheckbox = document.getElementById('editMode');
-    const resetButton = document.getElementById('resetButton');
-    const addItemButton = document.getElementById('addItemButton');
-    const addItemForm = document.getElementById('addItemForm');
-    const saveItemButton = document.getElementById('saveItemButton');
-    const statusDiv = document.getElementById('status');
+// Helper function to create menu items
+function createMenuItem(name, url, icon) {
+    const nav = document.querySelector('nav[role="navigation"]');
+    if (!nav) return null;
 
-    // Load saved state
-    chrome.storage.local.get(['editMode'], function (result) {
-        editModeCheckbox.checked = result.editMode || false;
-    });
+    const menuItem = document.createElement('a');
+    menuItem.setAttribute('role', 'link');
+    menuItem.setAttribute('href', url);
+    menuItem.setAttribute('data-testid', `AppTabBar_${name}_Link`);
+    menuItem.className = 'css-175oi2r r-6koalj r-eqz5dr r-16y2uox r-1habvwh r-cnw61z r-13qz1uu r-1ny4l3l r-1loqt21';
+    menuItem.style.position = 'relative';
 
-    // Toggle add item form
-    addItemButton.addEventListener('click', function () {
-        addItemForm.classList.toggle('visible');
-        if (!addItemForm.classList.contains('visible')) {
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemUrl').value = '';
+    menuItem.innerHTML = `
+        <div class="css-175oi2r r-sdzlij r-dnmrzs r-1awozwy r-18u37iz r-1777fci r-xyw6el r-o7ynqc r-6416eg">
+            <div class="css-175oi2r">
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-lwhw9o r-cnnz9e">
+                    <path d="${icon}"></path>
+                </svg>
+            </div>
+            <div dir="ltr" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-adyw6z r-135wba7 r-16dba41 r-dlybji r-nazi8o" style="color: rgb(231, 233, 234);">
+                <span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">${name}</span>
+            </div>
+        </div>
+    `;
+
+    // Add hover styles
+    const style = document.createElement('style');
+    style.textContent = `
+        [data-testid="AppTabBar_${name}_Link"]:hover {
+            background-color: rgba(231, 233, 234, 0.1) !important;
+            cursor: pointer;
         }
-    });
-
-    // Save new menu item
-    saveItemButton.addEventListener('click', function () {
-        const name = document.getElementById('itemName').value.trim();
-        const url = document.getElementById('itemUrl').value.trim();
-
-        if (!name || !url) {
-            statusDiv.textContent = 'Please fill in all fields';
-            statusDiv.style.color = '#dc3545';
-            return;
+        [data-testid="AppTabBar_${name}_Link"]:hover svg {
+            color: rgb(231, 233, 234) !important;
         }
+        [data-testid="AppTabBar_${name}_Link"] svg {
+            color: rgb(231, 233, 234);
+        }
+        [data-testid="AppTabBar_${name}_Link"].hidden-item {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+        [data-testid="AppTabBar_${name}_Link"].hidden-item:hover {
+            background-color: rgba(231, 233, 234, 0.1) !important;
+            cursor: pointer;
+        }
+    `;
+    document.head.appendChild(style);
 
-        // Find matching menu item from ALL_MENU_ITEMS or use default icon
-        const menuItem = ALL_MENU_ITEMS.find(item =>
-            item.name.toLowerCase() === name.toLowerCase() ||
-            item.url === url
-        );
+    // Find the "More" button to insert before it
+    const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
+    if (moreButton) {
+        nav.insertBefore(menuItem, moreButton);
+    } else {
+        nav.appendChild(menuItem);
+    }
 
-        const icon = menuItem ? menuItem.icon : 'M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z';
+    return menuItem;
+}
 
-        chrome.storage.local.get(['customItems'], function (result) {
-            const customItems = result.customItems || [];
-            const newItem = { name, url, icon };
-
-            // Check if item already exists
-            const exists = customItems.some(item =>
-                item.name.toLowerCase() === name.toLowerCase() ||
-                item.url === url
-            );
-
-            if (!exists) {
-                customItems.push(newItem);
-                chrome.storage.local.set({ customItems }, function () {
-                    // Send message to content script to add the new item
-                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            action: 'addMenuItem',
-                            item: newItem
-                        });
-                    });
-
-                    // Clear form and show success message
-                    document.getElementById('itemName').value = '';
-                    document.getElementById('itemUrl').value = '';
-                    addItemForm.classList.remove('visible');
-
-                    statusDiv.textContent = 'Menu item added!';
-                    statusDiv.style.color = '#28a745';
-                    setTimeout(() => {
-                        statusDiv.textContent = '';
-                    }, 2000);
-                });
-            } else {
-                statusDiv.textContent = 'This menu item already exists';
-                statusDiv.style.color = '#dc3545';
-                setTimeout(() => {
-                    statusDiv.textContent = '';
-                }, 2000);
-            }
-        });
-    });
-
-    // Save state when changed
-    editModeCheckbox.addEventListener('change', function () {
-        chrome.storage.local.set({ editMode: this.checked });
-
-        // Send message to content script
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                action: 'toggleEditMode',
-                editMode: editModeCheckbox.checked
-            });
-        });
-    });
-
-    // Handle reset button click
-    resetButton.addEventListener('click', function () {
-        // Clear all storage except customItems
-        chrome.storage.local.get(['customItems'], function (result) {
-            const customItems = result.customItems || [];
-            chrome.storage.local.clear(function () {
-                // Restore customItems if there were any
-                if (customItems.length > 0) {
-                    chrome.storage.local.set({ customItems });
-                }
-
-                // Send reset message to content script
-                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, {
-                        action: 'resetMenuItems'
-                    });
-
-                    // Show success message
-                    statusDiv.textContent = 'Menu items restored!';
-                    statusDiv.style.color = '#28a745';
-                    setTimeout(() => {
-                        statusDiv.textContent = '';
-                    }, 2000);
-                });
-            });
-        });
-    });
-});
+window.ALL_MENU_ITEMS = ALL_MENU_ITEMS;
+window.createMenuItem = createMenuItem; 

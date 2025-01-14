@@ -6,12 +6,20 @@
   "permissions": ["storage"],
   "host_permissions": ["*://*.twitter.com/*", "*://*.x.com/*"],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   },
   "content_scripts": [
     {
       "matches": ["*://*.twitter.com/*", "*://*.x.com/*"],
-      "js": ["content.js"]
+      "js": [
+        "content/menu-items.js",
+        "content/storage.js",
+        "content/drag-drop.js",
+        "content/edit-mode.js",
+        "content/ui-components.js",
+        "content/menu-manager.js",
+        "content/index.js"
+      ]
     }
   ]
 }
