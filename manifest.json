@@ -5,7 +5,13 @@
   "description": "Customize which menu items appear in the x.com sidebar",
   "permissions": ["storage"],
   "host_permissions": ["*://*.twitter.com/*", "*://*.x.com/*"],
+  "icons": {
+    "16": "x.png",
+    "48": "x.png",
+    "128": "x.png"
+  },
   "action": {
+    "default_icon": "x.png",
     "default_popup": "popup/popup.html"
   },
   "content_scripts": [
