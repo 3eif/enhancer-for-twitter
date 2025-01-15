@@ -125,22 +125,33 @@ function createMenuItem(name, url, icon) {
     });
 
     function updateMenuItemLayout() {
-        const isMinimized = window.innerWidth < 1300; // Twitter's breakpoint
+        const isMinimized = window.innerWidth < 1300;
+
+        // Get More button for reference
+        const moreButton = document.querySelector('[data-testid="AppTabBar_More_Menu"]');
+        if (!moreButton) return;
+
+        // Get exact classes and styles from More button
+        const moreButtonSvg = moreButton.querySelector('svg');
+        const moreButtonText = moreButton.querySelector('[dir="ltr"]');
+
+        // Determine the theme-specific icon class
+        const iconThemeClass = moreButtonSvg?.classList.contains('r-1nao33i') ? 'r-1nao33i' : 'r-18jsvk2';
+
         menuItem.innerHTML = `
             <div class="css-175oi2r r-sdzlij r-dnmrzs r-1awozwy r-18u37iz r-1777fci r-xyw6el r-o7ynqc r-6416eg">
                 <div class="css-175oi2r">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-18jsvk2 r-lwhw9o r-cnnz9e">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-lrvibr r-m6rgpd ${iconThemeClass} r-lwhw9o r-cnnz9e">
                         <g><path d="${icon}"></path></g>
                     </svg>
                 </div>
                 ${!isMinimized ? `
-                    <div dir="ltr" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-qvutc0 r-37j5jr r-adyw6z r-135wba7 r-16dba41 r-dlybji r-nazi8o">
-                        <span class="css-1jxf684 r-bcqeeo r-qvutc0 r-poiln3">${name}</span>
+                    <div dir="ltr" class="${moreButtonText?.className || 'css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-adyw6z r-135wba7 r-16dba41 r-dlybji r-nazi8o'}" style="${moreButtonText?.getAttribute('style') || ''}">
+                        <span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">${name}</span>
                     </div>
                 ` : ''}
             </div>`;
 
-        // Update active states after changing layout
         setTimeout(updateActiveStates, 0);
     }
 
