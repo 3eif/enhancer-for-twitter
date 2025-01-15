@@ -19,6 +19,21 @@ const ALL_MENU_ITEMS = [
     { name: 'Create your Space', url: '/i/spaces/start', icon: 'M12 22.25c-4.99 0-9.18-3.393-10.39-7.994l1.93-.512c.99 3.746 4.4 6.506 8.46 6.506s7.47-2.76 8.46-6.506l1.93.512c-1.21 4.601-5.4 7.994-10.39 7.994zM5 11.5c0 3.866 3.13 7 7 7s7-3.134 7-7V8.75c0-3.866-3.13-7-7-7s-7 3.134-7 7v2.75zm12-2.75v2.75c0 2.761-2.24 5-5 5s-5-2.239-5-5V8.75c0-2.761 2.24-5 5-5s5 2.239 5 5zM11.25 8v4.25c0 .414.34.75.75.75s.75-.336.75-.75V8c0-.414-.34-.75-.75-.75s-.75.336-.75.75zm-3 1v2.25c0 .414.34.75.75.75s.75-.336.75-.75V9c0-.414-.34-.75-.75-.75s-.75.336-.75.75zm7.5 0c0-.414-.34-.75-.75-.75s-.75.336-.75.75v2.25c0 .414.34.75.75.75s.75-.336.75-.75V9z' }
 ];
 
+const FILLED_ICONS = {
+    'Bookmarks': 'M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z',
+    'Lists': 'M18.5 2h-13C4.12 2 3 3.12 3 4.5v15C3 20.88 4.12 22 5.5 22h13c1.38 0 2.5-1.12 2.5-2.5v-15C21 3.12 19.88 2 18.5 2zM16 14H8v-2h8v2zm0-4H8V8h8v2z'
+};
+
+// Helper function to get current username
+function getCurrentUsername() {
+    const profileLink = document.querySelector('a[data-testid="AppTabBar_Profile_Link"]');
+    if (profileLink) {
+        const username = profileLink.getAttribute('href').replace('/', '');
+        return username;
+    }
+    return '';
+}
+
 // Helper function to create menu items
 function createMenuItem(name, url, icon) {
     const nav = document.querySelector('nav[role="navigation"]');
@@ -27,27 +42,130 @@ function createMenuItem(name, url, icon) {
     const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
     if (!moreButton) return;
 
-    const svgClasses = moreButton.querySelector('svg').getAttribute('class');
+    // Replace {username} in URL with actual username for Lists
+    const username = getCurrentUsername();
+    const finalUrl = name === 'Lists' ? `/${username}/lists` : url;
+
+    // Helper function to check if this menu item is active
+    const isActiveMenuItem = () => {
+        const currentPath = window.location.pathname;
+        // Handle special cases and normalize URLs for comparison
+        const itemPath = finalUrl.startsWith('http') ? finalUrl : finalUrl.split('?')[0];
+        const normalizedCurrentPath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
+        const normalizedItemPath = itemPath.endsWith('/') ? itemPath.slice(0, -1) : itemPath;
+        return normalizedCurrentPath === normalizedItemPath;
+    };
+
     const menuItem = document.createElement('a');
-    menuItem.href = url;
+    menuItem.href = finalUrl;
     menuItem.setAttribute('role', 'link');
     menuItem.setAttribute('data-testid', `AppTabBar_${name}_Link`);
     menuItem.setAttribute('aria-label', name);
     menuItem.className = moreButton.className;
 
-    // Create the menu item with the same structure but without hover classes initially
-    menuItem.innerHTML = `
-        <div class="css-175oi2r r-sdzlij r-dnmrzs r-1awozwy r-18u37iz r-1777fci r-xyw6el r-o7ynqc r-6416eg">
-            <div class="css-175oi2r">
-                <svg viewBox="0 0 24 24" aria-hidden="true" class="${svgClasses}">
-                    <g><path d="${icon}"></path></g>
-                </svg>
-            </div>
-            <div dir="ltr" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-adyw6z r-135wba7 r-16dba41 r-dlybji r-nazi8o" style="color: rgb(15, 20, 25);">
-                <span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">${name}</span>
-            </div>
-        </div>
-    `;
+    // Set initial bold class based on current URL
+    const boldClass = isActiveMenuItem() ? 'r-b88u0q' : '';
+
+    // Helper function to update active state of all menu items
+    const updateActiveStates = () => {
+        // Get current path
+        const currentPath = window.location.pathname;
+        const normalizedCurrentPath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
+
+        // Find and update all menu items (both default and custom)
+        document.querySelectorAll('nav[role="navigation"] a[role="link"]').forEach(link => {
+            const itemPath = link.getAttribute('href');
+            if (!itemPath) return;
+
+            const normalizedItemPath = itemPath.endsWith('/') ? itemPath.slice(0, -1) : itemPath;
+            const isActive = normalizedCurrentPath === normalizedItemPath;
+
+            // Get item name from either the text span or aria-label
+            const itemName = link.querySelector('[dir="ltr"] span')?.textContent?.trim()
+                || link.getAttribute('aria-label');
+
+            // Update icon if it exists in FILLED_ICONS
+            if (itemName && FILLED_ICONS[itemName]) {
+                const svgPath = link.querySelector('svg path');
+                if (svgPath) {
+                    svgPath.setAttribute('d', isActive ? FILLED_ICONS[itemName] :
+                        ALL_MENU_ITEMS.find(item => item.name === itemName)?.icon);
+                }
+            }
+
+            // Update text bold state if text div exists
+            const textDiv = link.querySelector('div[dir="ltr"]');
+            if (textDiv) {
+                if (isActive) {
+                    textDiv.classList.add('r-b88u0q');
+                } else {
+                    textDiv.classList.remove('r-b88u0q');
+                }
+            }
+        });
+    };
+
+    // Add click handler for default menu items
+    function addDefaultMenuItemsHandler() {
+        document.querySelectorAll('nav[role="navigation"] a[role="link"]').forEach(link => {
+            if (!link.hasAttribute('data-menu-handler')) {
+                link.setAttribute('data-menu-handler', 'true');
+                link.addEventListener('click', () => {
+                    setTimeout(updateActiveStates, 100); // Small delay to ensure DOM is updated
+                });
+            }
+        });
+    }
+
+    // Call this when creating menu items and after navigation
+    addDefaultMenuItemsHandler();
+    window.addEventListener('popstate', () => {
+        updateActiveStates();
+        addDefaultMenuItemsHandler();
+    });
+
+    function updateMenuItemLayout() {
+        const isMinimized = window.innerWidth < 1300; // Twitter's breakpoint
+        menuItem.innerHTML = `
+            <div class="css-175oi2r r-sdzlij r-dnmrzs r-1awozwy r-18u37iz r-1777fci r-xyw6el r-o7ynqc r-6416eg">
+                <div class="css-175oi2r">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-18jsvk2 r-lwhw9o r-cnnz9e">
+                        <g><path d="${icon}"></path></g>
+                    </svg>
+                </div>
+                ${!isMinimized ? `
+                    <div dir="ltr" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-bcqeeo r-qvutc0 r-37j5jr r-adyw6z r-135wba7 r-16dba41 r-dlybji r-nazi8o">
+                        <span class="css-1jxf684 r-bcqeeo r-qvutc0 r-poiln3">${name}</span>
+                    </div>
+                ` : ''}
+            </div>`;
+
+        // Update active states after changing layout
+        setTimeout(updateActiveStates, 0);
+    }
+
+    // Initial layout
+    updateMenuItemLayout();
+
+    // Update on window resize
+    window.addEventListener('resize', updateMenuItemLayout);
+
+    // Add a popstate listener to update the bold styling when navigation occurs
+    window.addEventListener('popstate', updateActiveStates);
+
+    // Also listen for pushState/replaceState changes
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function () {
+        originalPushState.apply(this, arguments);
+        updateActiveStates();
+    };
+
+    history.replaceState = function () {
+        originalReplaceState.apply(this, arguments);
+        updateActiveStates();
+    };
 
     // Add hover event listeners to apply/remove the hover classes
     menuItem.addEventListener('mouseenter', () => {
