@@ -200,9 +200,13 @@ function enableEditMode() {
     // Add the Done button
     const postButton = document.querySelector('[data-testid="SideNav_NewTweet_Button"]');
     addDoneButton(editMode, postButton);
+
+    makeButtonsEditable();
 }
 
 function disableEditMode() {
+    setEditMode(false);
+
     const menuItems = document.querySelectorAll('nav[role="navigation"] a');
 
     menuItems.forEach(item => {
@@ -246,6 +250,8 @@ function disableEditMode() {
     if (doneButton) {
         doneButton.remove();
     }
+
+    restoreProfileButtons();
 }
 
 window.setEditMode = setEditMode;

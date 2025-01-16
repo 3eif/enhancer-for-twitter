@@ -282,65 +282,25 @@ function addDoneButton(editMode, postButton) {
             }))
             .filter(item => item.name && item.url && item.icon);
 
+        const profileButtons = document.querySelectorAll('.css-175oi2r.r-obd0qt.r-18u37iz button');
+        const hiddenProfileButtons = [];
+
+        profileButtons.forEach(button => {
+            const ariaLabel = button.getAttribute('aria-label');
+            if (ariaLabel && button.closest('.css-175oi2r.r-sdzlij').style.display === 'none') {
+                hiddenProfileButtons.push(ariaLabel);
+            }
+        });
+
         // Save to storage
         chrome.storage.local.set({
             menuOrder,
             hiddenItems,
             customItems,
+            hiddenProfileButtons,
             editMode: false
         }, function () {
-            // Disable all menu item interactions
-            menuItems.forEach(item => {
-                // Remove draggable attribute and event listeners
-                item.removeAttribute('draggable');
-                item.style.cursor = 'pointer';
-
-                // Remove all event listeners by cloning and replacing
-                const newItem = item.cloneNode(true);
-                item.parentNode.replaceChild(newItem, item);
-
-                // Remove any strike-through elements
-                const strikeContainer = newItem.querySelector('.strike-container');
-                if (strikeContainer) {
-                    strikeContainer.remove();
-                }
-            });
-
-            // Remove edit mode UI
-            document.querySelectorAll('.strike-container').forEach(el => el.remove());
-            document.querySelector('#addMenuItemsButton')?.remove();
-
-            // Show the Post button and remove Done button
-            postButton.style.display = '';
-            doneButton.remove();
-
-            // Add CSS to prevent jiggling
-            const styleId = 'menu-stabilizer';
-            let styleEl = document.getElementById(styleId);
-            if (!styleEl) {
-                styleEl = document.createElement('style');
-                styleEl.id = styleId;
-                document.head.appendChild(styleEl);
-            }
-
-            styleEl.textContent = `
-                nav[role="navigation"] a[role="link"] {
-                    transform: none !important;
-                    transition: none !important;
-                }
-                nav[role="navigation"] a[role="link"]:hover {
-                    transform: none !important;
-                    background-color: transparent !important;
-                }
-                nav[role="navigation"] a[role="link"] > div {
-                    transform: none !important;
-                    transition: none !important;
-                }
-            `;
-
-            // Remove edit mode class and update popup
-            document.body.classList.remove('edit-mode');
-            chrome.runtime.sendMessage({ action: 'updateEditMode', value: false });
+            disableEditMode();
         });
     });
 

@@ -15,13 +15,34 @@ document.addEventListener('DOMContentLoaded', function () {
         const isEditMode = this.checked;
         editingInfo.style.display = isEditMode ? 'block' : 'none';
 
-        chrome.storage.local.set({ editMode: isEditMode });
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                action: 'toggleEditMode',
-                editMode: isEditMode
+        if (!isEditMode) {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, { action: 'saveState' }, function (response) {
+                    const { menuOrder, hiddenItems, customItems, hiddenProfileButtons } = response;
+
+                    chrome.storage.local.set({
+                        menuOrder,
+                        hiddenItems,
+                        customItems,
+                        hiddenProfileButtons,
+                        editMode: false
+                    }, function () {
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            action: 'toggleEditMode',
+                            editMode: false
+                        });
+                    });
+                });
             });
-        });
+        } else {
+            chrome.storage.local.set({ editMode: true });
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'toggleEditMode',
+                    editMode: true
+                });
+            });
+        }
     });
 
     // Handle reset button click
@@ -40,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         action: 'resetMenuItems'
                     });
 
-                    statusDiv.textContent = 'Menu items restored!';
+                    statusDiv.textContent = 'Your changes have been reset!';
                     setTimeout(() => {
                         statusDiv.textContent = '';
                         resetButton.disabled = false;

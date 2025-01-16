@@ -15,7 +15,7 @@ A Chrome extension that allows you to customize the sidebar menu on X (formerly 
 ## How to Use
 
 1. Click the extension icon to open the popup menu
-2. Toggle "Edit Menu Items" to enter edit mode
+2. Toggle "Edit" to enter edit mode
 3. In edit mode:
    - Drag items to reorder them
    - Click items to hide them
