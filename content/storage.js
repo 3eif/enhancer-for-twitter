@@ -1,7 +1,7 @@
 // Storage helper functions
 function debugStorage() {
     chrome.storage.local.get(null, function (items) {
-        console.log('Current storage state:', items);
+        // console.log('Current storage state:', items);
     });
 }
 

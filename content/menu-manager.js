@@ -22,11 +22,11 @@ function initializeMenu() {
     const nav = document.querySelector('nav[role="navigation"]');
     if (!nav) return;
 
-    console.log('Initializing menu');
+    // console.log('Initializing menu');
 
     // Detect default items first
     defaultVisibleItems = detectDefaultItems();
-    console.log('Default visible items:', defaultVisibleItems);
+    // console.log('Default visible items:', defaultVisibleItems);
 
     chrome.storage.local.get(['hiddenItems', 'editMode', 'customItems', 'menuOrder'], function (result) {
         editMode = result.editMode || false;
@@ -34,7 +34,7 @@ function initializeMenu() {
         const menuOrder = result.menuOrder || [];
         const hiddenItems = result.hiddenItems || [];
 
-        console.log('Retrieved from storage:', { customItems, menuOrder, hiddenItems });
+        // console.log('Retrieved from storage:', { customItems, menuOrder, hiddenItems });
 
         // First restore custom items
         customItems.forEach(item => {
@@ -46,7 +46,7 @@ function initializeMenu() {
             );
 
             if (!exists) {
-                console.log('Creating custom menu item:', item.name);
+                // console.log('Creating custom menu item:', item.name);
                 createMenuItem(item.name, item.url, item.icon);
             }
         });
@@ -57,14 +57,14 @@ function initializeMenu() {
                 .find(el => el.querySelector('[dir="ltr"] span')?.textContent?.trim() === itemName);
 
             if (item) {
-                console.log('Hiding menu item:', itemName);
+                // console.log('Hiding menu item:', itemName);
                 item.style.display = 'none';
             }
         });
 
         // Then restore menu order for visible items
         if (menuOrder.length > 0) {
-            console.log('Restoring menu order:', menuOrder);
+            // console.log('Restoring menu order:', menuOrder);
             const moreButton = nav.querySelector('[data-testid="AppTabBar_More_Menu"]');
             if (moreButton) {
                 nav.appendChild(moreButton); // Move More to the end
@@ -82,7 +82,7 @@ function initializeMenu() {
                 menuOrder.forEach(itemName => {
                     const item = menuItems.get(itemName);
                     if (item) {
-                        console.log('Reordering item:', itemName);
+                        // console.log('Reordering item:', itemName);
                         nav.insertBefore(item, moreButton);
                     }
                 });
@@ -90,7 +90,7 @@ function initializeMenu() {
         }
 
         isInitialized = true;
-        console.log('Menu initialization complete');
+        // console.log('Menu initialization complete');
     });
 }
 
@@ -191,7 +191,7 @@ function saveMenuOrder() {
 
     // Save to storage
     chrome.storage.local.set({ menuOrder }, () => {
-        console.log('Menu order saved:', menuOrder);
+        // console.log('Menu order saved:', menuOrder);
     });
 }
 

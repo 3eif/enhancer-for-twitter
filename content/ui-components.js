@@ -248,8 +248,6 @@ function addDoneButton(editMode, postButton) {
         const nav = document.querySelector('nav[role="navigation"]');
         if (!nav) return;
 
-        console.log('Done button clicked - saving menu state and disabling edit mode');
-
         // Get all menu items
         const menuItems = [...nav.querySelectorAll('a[role="link"]')];
 
