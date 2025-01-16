@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Enhancer for X (formerly known as Twitter)",
-  "version": "0.0.0.1",
+  "version": "0.0.0.2",
   "description": "Customize which menu items appear in the x.com sidebar. This extension is not affiliated with Twitter or X.",
   "permissions": ["storage"],
   "host_permissions": ["*://*.twitter.com/*", "*://*.x.com/*"],
